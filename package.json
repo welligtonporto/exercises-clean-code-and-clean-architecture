@@ -1,0 +1,27 @@
+{
+  "name": "exercises-clean-code-and-clean-architecture",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/welligtonporto/exercises-clean-code-and-clean-architecture.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/welligtonporto/exercises-clean-code-and-clean-architecture/issues"
+  },
+  "homepage": "https://github.com/welligtonporto/exercises-clean-code-and-clean-architecture#readme",
+  "dependencies": {
+    "@types/jest": "^29.4.0",
+    "jest": "^29.4.3",
+    "ts-jest": "^29.0.5",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.9.5"
+  }
+}
