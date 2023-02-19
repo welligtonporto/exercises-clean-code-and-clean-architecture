@@ -25,5 +25,7 @@ test("Deve criar um pedido com 3 produtos, associar um cupom de desconto e calcu
 test("Não deve criar um pedido com cpf inválido (lançar algum tipo de erro)", function(){
     // expect(() => new Consumer("Welligton", null)).toThrow(new Error("Invalid cpf"));
     // expect(() => new Consumer("Welligton", undefined)).toThrow(new Error("Invalid cpf"));
+    expect(() => new Consumer("Welligton", null)).toThrow(new Error("Invalid cpf"));
+    expect(() => new Consumer("Welligton", undefined)).toThrow(new Error("Invalid cpf"));
     expect(() => new Consumer("Welligton", "11111111111")).toThrow(new Error("Invalid cpf"));
 });
