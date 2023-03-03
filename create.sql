@@ -16,7 +16,9 @@ insert into cccat10.product (id_product, description, price) values (3, 'C', 30)
 
 create table cccat10.coupon (
 	code text,
-	percentage numeric
+	percentage numeric,
+	expiration numeric
 );
 
-insert into cccat10.coupon (code, percentage) values ('VALE20', 20);
+insert into cccat10.coupon (code, percentage, expiration) values ('VALE20', 20, 1706929200000);
+insert into cccat10.coupon (code, percentage, expiration) values ('VALE30', 30, 1643857200000);
