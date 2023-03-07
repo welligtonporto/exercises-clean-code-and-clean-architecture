@@ -16,9 +16,15 @@ app.post("/checkout", async function (req: Request, res: Response) {
 		output.message = "Repeated products";
 	} else {
 		if (req.body.items) {
+			let products = [];
 			for (const item of req.body.items) {
 				const [productData] = await connection.query("select * from cccat10.product where id_product = $1", item.idProduct);
 				output.total += parseFloat(productData.price) * item.quantity;
+				products.push(productData);
+			}
+
+			if (products.some((item: Product) => parseFloat(item.height) < 0 || parseFloat(item.width) < 0 || parseFloat(item.depth) < 0)){
+				output.message = "Invalid dimension";
 			}
 	
 			if (req.body.coupon) {
@@ -36,6 +42,12 @@ app.post("/checkout", async function (req: Request, res: Response) {
 	await connection.$pool.end();
 	res.json(output);
 });
+
+type Product = {
+	height: string,
+	width: string,
+	depth: string
+}
 
 type Output = {
 	total: number,

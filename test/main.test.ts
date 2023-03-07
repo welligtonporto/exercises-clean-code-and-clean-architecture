@@ -89,3 +89,15 @@ test("Ao fazer um pedido, o mesmo item não pode ser informado mais de uma vez",
 	const output = response.data;
 	expect(output.message).toBe("Repeated products");
 });
+
+test("Nenhuma dimensão do item pode ser negativa", async function () {
+	const input = {
+		cpf: "407.302.170-27",
+		items: [
+			{ idProduct: 7, quantity: 1 },
+		]
+	};
+	const response = await axios.post("http://localhost:3000/checkout", input);
+	const output = response.data;
+	expect(output.message).toBe("Invalid dimension");
+});
