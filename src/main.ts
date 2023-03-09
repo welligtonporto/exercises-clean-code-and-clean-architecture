@@ -4,6 +4,8 @@ import pgp from "pg-promise";
 const app = express();
 app.use(express.json());
 
+const DISTANCE = 1000;
+
 app.post("/checkout", async function (req: Request, res: Response) {
 	const output: Output = {
 		total: 0
@@ -20,11 +22,23 @@ app.post("/checkout", async function (req: Request, res: Response) {
 			for (const item of req.body.items) {
 				const [productData] = await connection.query("select * from cccat10.product where id_product = $1", item.idProduct);
 				output.total += parseFloat(productData.price) * item.quantity;
-				products.push(productData);
+				const volume = (productData.width * productData.height * productData.depth);
+				const density = parseInt(`${productData.weight / volume}`);
+				const unitShipping = DISTANCE * volume * (density / 100);
+				const shipping = unitShipping * item.quantity;
+				products.push({
+					...productData,
+					shipping
+				});
 			}
+
+			const totalShipping = products.reduce((partialSum, item) => partialSum + item.shipping, 0);
+			output.shipping = totalShipping > 10 ? `R$ ${totalShipping}` : `R$ 10.00`;
 
 			if (products.some((item: Product) => parseFloat(item.height) < 0 || parseFloat(item.width) < 0 || parseFloat(item.depth) < 0)){
 				output.message = "Invalid dimension";
+			} else if (products.some((item: Product) => parseFloat(item.weight) < 0)) {
+				output.message = "Invalid weight";
 			}
 	
 			if (req.body.coupon) {
@@ -46,11 +60,13 @@ app.post("/checkout", async function (req: Request, res: Response) {
 type Product = {
 	height: string,
 	width: string,
-	depth: string
+	depth: string,
+	weight: string
 }
 
 type Output = {
 	total: number,
+	shipping?: string,
 	message?: string
 }
 

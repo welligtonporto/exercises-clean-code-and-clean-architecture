@@ -101,3 +101,41 @@ test("Nenhuma dimensão do item pode ser negativa", async function () {
 	const output = response.data;
 	expect(output.message).toBe("Invalid dimension");
 });
+
+test("O peso do item não pode ser negativo", async function () {
+	const input = {
+		cpf: "407.302.170-27",
+		items: [
+			{ idProduct: 8, quantity: 1 },
+		]
+	};
+	const response = await axios.post("http://localhost:3000/checkout", input);
+	const output = response.data;
+	expect(output.message).toBe("Invalid weight");
+});
+
+test("Deve calcular o valor do frete com base nas dimensões (altura, largura e profundidade em cm) e o peso dos produtos (em kg)", async function () {
+	const input = {
+		cpf: "407.302.170-27",
+		items: [
+			{ idProduct: 4, quantity: 2 },
+			{ idProduct: 5, quantity: 1 },
+			{ idProduct: 6, quantity: 1 }
+		]
+	};
+	const response = await axios.post("http://localhost:3000/checkout", input);
+	const output = response.data;
+	expect(output.shipping).toBe("R$ 449.98");
+});
+
+test("Deve retornar o preço mínimo de frete caso ele seja superior ao valor calculado", async function () {
+	const input = {
+		cpf: "407.302.170-27",
+		items: [
+			{ idProduct: 4, quantity: 1 }
+		]
+	};
+	const response = await axios.post("http://localhost:3000/checkout", input);
+	const output = response.data;
+	expect(output.shipping).toBe("R$ 10.00");
+});
