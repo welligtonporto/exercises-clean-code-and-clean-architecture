@@ -7,16 +7,15 @@ app.use(express.json());
 const DISTANCE = 1000;
 
 app.post("/checkout", async function (req: Request, res: Response) {
-	const output: Output = {
-		total: 0
-	};
 	const connection = pgp()("postgres://postgres:123456@localhost:5432/cccat10");
-
-	if (req.body?.items?.some((item: any) => item.quantity < 0)) {
-		output.message = "Invalid quantity";
-	} else if (req.body?.items?.some((item: any) => req.body.items.filter((i: any) => i.idProduct === item.idProduct)?.length >= 2)) {
-		output.message = "Repeated products";
-	} else {
+	try {
+		const isValid = validate(req.body.cpf);
+		if (!isValid) throw new Error("Invalid cpf");
+		const output: Output = {
+			total: 0
+		};
+		if (req.body?.items?.some((item: any) => item.quantity < 0)) throw new Error("Invalid quantity");
+		if (req.body?.items?.some((item: any) => req.body.items.filter((i: any) => i.idProduct === item.idProduct)?.length >= 2)) throw new Error("Repeated products");
 		if (req.body.items) {
 			let products = [];
 			for (const item of req.body.items) {
@@ -31,16 +30,13 @@ app.post("/checkout", async function (req: Request, res: Response) {
 					shipping
 				});
 			}
-
 			const totalShipping = products.reduce((partialSum, item) => partialSum + item.shipping, 0);
 			output.shipping = totalShipping > 10 ? `R$ ${totalShipping}` : `R$ 10.00`;
-
-			if (products.some((item: Product) => parseFloat(item.height) < 0 || parseFloat(item.width) < 0 || parseFloat(item.depth) < 0)){
-				output.message = "Invalid dimension";
+			if (products.some((item: Product) => parseFloat(item.height) <= 0 || parseFloat(item.width) <= 0 || parseFloat(item.depth) <= 0)){
+				throw new Error("Invalid dimension");
 			} else if (products.some((item: Product) => parseFloat(item.weight) < 0)) {
-				output.message = "Invalid weight";
+				throw new Error("Invalid weight");
 			}
-	
 			if (req.body.coupon) {
 				const [couponData] = await connection.query("select * from cccat10.coupon where code = $1", [req.body.coupon]);
 				const expiration = couponData.expiration;
@@ -50,11 +46,14 @@ app.post("/checkout", async function (req: Request, res: Response) {
 				}
 			}
 		}
+		res.json(output);
+	} catch (error: any) {
+		res.status(422).json({
+			message: error.message
+		});
+	} finally {
+		await connection.$pool.end();
 	}
-	const isValid = validate(req.body.cpf);
-	if (!isValid) output.message = "Invalid cpf";
-	await connection.$pool.end();
-	res.json(output);
 });
 
 type Product = {
@@ -66,8 +65,7 @@ type Product = {
 
 type Output = {
 	total: number,
-	shipping?: string,
-	message?: string
+	shipping?: string
 }
 
 app.listen(3000);

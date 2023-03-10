@@ -1,11 +1,16 @@
 import axios from "axios";
 
+axios.defaults.validateStatus = function () {
+	return true;
+}
+
 test("Não deve aceitar um pedido com cpf inválido", async function () {
 	const input = {
 		cpf: "406.302.170-27"
 	}
 	const response = await axios.post("http://localhost:3000/checkout", input);
 	const output = response.data;
+	expect(response.status).toBe(422);
 	expect(output.message).toBe("Invalid cpf");
 });
 
@@ -73,6 +78,7 @@ test("Ao fazer um pedido, a quantidade de um item não pode ser negativa", async
 	};
 	const response = await axios.post("http://localhost:3000/checkout", input);
 	const output = response.data;
+	expect(response.status).toBe(422);
 	expect(output.message).toBe("Invalid quantity");
 });
 
@@ -87,6 +93,7 @@ test("Ao fazer um pedido, o mesmo item não pode ser informado mais de uma vez",
 	};
 	const response = await axios.post("http://localhost:3000/checkout", input);
 	const output = response.data;
+	expect(response.status).toBe(422);
 	expect(output.message).toBe("Repeated products");
 });
 
@@ -99,6 +106,7 @@ test("Nenhuma dimensão do item pode ser negativa", async function () {
 	};
 	const response = await axios.post("http://localhost:3000/checkout", input);
 	const output = response.data;
+	expect(response.status).toBe(422);
 	expect(output.message).toBe("Invalid dimension");
 });
 
@@ -111,6 +119,7 @@ test("O peso do item não pode ser negativo", async function () {
 	};
 	const response = await axios.post("http://localhost:3000/checkout", input);
 	const output = response.data;
+	expect(response.status).toBe(422);
 	expect(output.message).toBe("Invalid weight");
 });
 
